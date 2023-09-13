@@ -129,3 +129,20 @@ func TestGetTotalTickets(t *testing.T) {
 	assert.NotNil(t, avr)
 	assert.True(t, dbMock.spy)
 }
+
+func TestGetTotalTicketsEmpty(t *testing.T) {
+
+	dbMock := &DbMock{
+		db:  tickets,
+		spy: false,
+		err: nil,
+	}
+	repo := NewRepositoryTest(dbMock)
+	service := NewService(repo)
+
+	avr, err := service.AverageDestination(cxt, "Argentina")
+
+	assert.Nil(t, err)
+	assert.Equal(t, 0.0, avr)
+	assert.True(t, dbMock.spy)
+}
