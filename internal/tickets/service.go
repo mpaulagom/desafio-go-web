@@ -2,12 +2,10 @@ package tickets
 
 import (
 	"context"
-
-	"github.com/bootcamp-go/desafio-go-web/internal/domain"
 )
 
 type Service interface {
-	GetTotalTickets(ctx context.Context, destination string) ([]domain.Ticket, error)
+	GetTotalTickets(ctx context.Context, destination string) (int, error)
 	AverageDestination(ctx context.Context, destination string) (float64, error)
 }
 
@@ -23,8 +21,12 @@ func NewService(r Repository) *ServiceTickets {
 }
 
 // GetTotalTickets returns the total of tickets to the city with name in destination variable
-func (s *ServiceTickets) GetTotalTickets(ctx context.Context, destination string) (tickets []domain.Ticket, err error) {
-	tickets, err = s.repo.GetTicketByDestination(ctx, destination)
+func (s *ServiceTickets) GetTotalTickets(ctx context.Context, destination string) (totalTickets int, err error) {
+	ticketsR, err := s.repo.GetTicketByDestination(ctx, destination)
+	if err != nil {
+		return
+	}
+	totalTickets = len(ticketsR)
 	return
 }
 

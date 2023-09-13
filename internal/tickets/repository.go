@@ -2,7 +2,6 @@ package tickets
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/bootcamp-go/desafio-go-web/internal/domain"
 )
@@ -24,8 +23,8 @@ func NewRepository(db []domain.Ticket) Repository {
 
 func (r *repository) GetAll(ctx context.Context) ([]domain.Ticket, error) {
 
-	if len(r.db) == 0 {
-		return []domain.Ticket{}, fmt.Errorf("empty list of tickets")
+	if r.db == nil || len(r.db) == 0 {
+		return []domain.Ticket{}, domain.ErrEmptyListOfTickets
 	}
 
 	return r.db, nil
@@ -35,8 +34,8 @@ func (r *repository) GetTicketByDestination(ctx context.Context, destination str
 
 	var ticketsDest []domain.Ticket
 
-	if len(r.db) == 0 {
-		return []domain.Ticket{}, fmt.Errorf("empty list of tickets")
+	if r.db == nil || len(r.db) == 0 {
+		return []domain.Ticket{}, domain.ErrEmptyListOfTickets
 	}
 
 	for _, t := range r.db {
@@ -44,6 +43,8 @@ func (r *repository) GetTicketByDestination(ctx context.Context, destination str
 			ticketsDest = append(ticketsDest, t)
 		}
 	}
-
+	if len(ticketsDest) == 0 {
+		return []domain.Ticket{}, domain.ErrDestinationNotFound
+	}
 	return ticketsDest, nil
 }

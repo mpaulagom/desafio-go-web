@@ -1,8 +1,10 @@
 package handler
 
 import (
+	"errors"
 	"net/http"
 
+	"github.com/bootcamp-go/desafio-go-web/internal/domain"
 	"github.com/bootcamp-go/desafio-go-web/internal/tickets"
 	"github.com/gin-gonic/gin"
 )
@@ -17,6 +19,11 @@ func NewService(s tickets.Service) *Service {
 	}
 }
 
+type ResponseBody struct {
+	Message string      `json:"Message"`
+	Result  interface{} `json:"Result"`
+}
+
 // GetTicketsByCountry returns the tickets with destination in path param "dest"
 func (s *Service) GetTicketsByCountry() gin.HandlerFunc {
 	return func(c *gin.Context) {
@@ -25,11 +32,18 @@ func (s *Service) GetTicketsByCountry() gin.HandlerFunc {
 
 		tickets, err := s.service.GetTotalTickets(c, destination)
 		if err != nil {
-			c.String(http.StatusInternalServerError, err.Error(), nil)
+			switch {
+			case errors.Is(err, domain.ErrDestinationNotFound):
+				body := ResponseBody{Message: err.Error(), Result: 0}
+				c.JSON(http.StatusNotFound, body)
+			default:
+				body := ResponseBody{Message: "internal server error", Result: 0}
+				c.JSON(http.StatusInternalServerError, body)
+			}
 			return
 		}
-
-		c.JSON(200, tickets)
+		body := ResponseBody{Message: "total of tickets", Result: tickets}
+		c.JSON(200, body)
 	}
 }
 
@@ -41,10 +55,17 @@ func (s *Service) AverageDestination() gin.HandlerFunc {
 
 		avg, err := s.service.AverageDestination(c, destination)
 		if err != nil {
-			c.String(http.StatusInternalServerError, err.Error(), nil)
+			switch {
+			case errors.Is(err, domain.ErrDestinationNotFound):
+				body := ResponseBody{Message: err.Error(), Result: 0}
+				c.JSON(http.StatusNotFound, body)
+			default:
+				body := ResponseBody{Message: "internal server error", Result: 0}
+				c.JSON(http.StatusInternalServerError, body)
+			}
 			return
 		}
-
-		c.JSON(200, avg)
+		body := ResponseBody{Message: "average of tickets", Result: avg}
+		c.JSON(http.StatusOK, body)
 	}
 }
